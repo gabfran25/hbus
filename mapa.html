@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa de HBus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Librerías de Leaflet y MQTT -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="stilo.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+    <style>
+
+        body {
+            background-color: #06d6b1;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Estilo para el mapa pequeño */
+        #map {
+            height: 820px;
+            width: 100%; /* 100% de ancho */
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-image: url(lgn2.jpg);
+        }
+
+        .dropdown-container {
+            margin-bottom: 10px;
+        }
+
+        /* Estilos para el dropdown */
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" name="eleccion">
+    <!-- Dropdown para seleccionar la ruta -->
+    <div class="dropdown-container">
+        <label for="routeSelect">Selecciona una ruta:</label>
+        <select id="routeSelect">
+            <option value="">--Selecciona Ruta--</option>
+            <option value="ruta_1">Ruta 1</option>
+            <option value="ruta_2">Ruta 2</option>
+            <option value="ruta_3">Ruta 3</option>
+        </select>
+    </div>
+
+    <!-- Mapa -->
+    <div id="map"></div>
+</div>
+
+<script>
+    // Inicializar el mapa con un tamaño reducido
+    var map = L.map('map').setView([29.083, -110.962], 12); // Coordenadas iniciales
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Definir una capa de vehículos (Marcadores de vehículos)
+    var markers = {};
+
+    // Definir rutas preestablecidas (ejemplo simple de rutas)
+    var routes = {
+        "ruta_1": [
+            [29.083, -110.962],
+            [29.084, -110.961],
+            [29.085, -110.960]
+        ],
+        "ruta_2": [
+            [29.086, -110.960],
+            [29.087, -110.958],
+            [29.088, -110.957]
+        ],
+        "ruta_2A": [
+            [29.089, -110.955],
+            [29.090, -110.954],
+            [29.091, -110.953]
+        ],
+        "ruta_3": [
+            [29.089, -110.955],
+            [29.090, -110.954],
+            [29.091, -110.953]
+        ],
+        "ruta_4": [
+            [29.089, -110.955],
+            [29.090, -110.954],
+            [29.091, -110.953]
+        ],
+        "ruta_5": [
+            [29.089, -110.955],
+            [29.090, -110.954],
+            [29.091, -110.953]
+        ],
+        "ruta_6": [
+            [29.089, -110.955],
+            [29.090, -110.954],
+            [29.091, -110.953]
+        ],
+        "ruta_7": [
+            [29.089, -110.955],
+            [29.090, -110.954],
+            [29.091, -110.953]
+        ],
+        "ruta_8": [
+            [29.089, -110.955],
+            [29.090, -110.954],
+            [29.091, -110.953]
+        ],
+        "ruta_9": [
+            [29.089, -110.955],
+            [29.090, -110.954],
+            [29.091, -110.953]
+        ],
+        "ruta_10": [
+            [29.089, -110.955],
+            [29.090, -110.954],
+            [29.091, -110.953]
+        ]
+    };
+
+    // Conectar a MQTT
+    const client = mqtt.connect('wss://test.mosquitto.org:8081/mqtt');
+
+    client.on('connect', function () {
+        console.log('Conectado a MQTT');
+        client.subscribe('transporte/posicion');
+    });
+
+    client.on('message', function (topic, message) {
+        console.log('Mensaje recibido:', message.toString());
+
+        try {
+            var data = JSON.parse(message.toString());
+            var lat = data.lat;
+            var lon = data.lon;
+            var vehiculoId = data.id; // ID único del vehículo
+
+            if (markers[vehiculoId]) {
+                // Si ya existe un marcador, lo movemos
+                markers[vehiculoId].setLatLng([lat, lon]);
+            } else {
+                // Si es un nuevo vehículo, lo agregamos
+                var marker = L.marker([lat, lon]).addTo(map)
+                    .bindPopup(`<b>Vehículo ID:</b> ${vehiculoId}<br><b>Ubicación:</b> Lat: ${lat}, Lon: ${lon}`);
+                markers[vehiculoId] = marker;
+            }
+
+            map.setView([lat, lon], 15);
+
+        } catch (e) {
+            console.error('Error procesando mensaje MQTT', e);
+        }
+    });
+
+    // Manejo de la selección de rutas
+    document.getElementById('routeSelect').addEventListener('change', function (event) {
+        var routeName = event.target.value;
+
+        // Limpiar las rutas anteriores del mapa
+        for (var route in routes) {
+            if (routes.hasOwnProperty(route)) {
+                map.removeLayer(routes[route].layer);
+            }
+        }
+
+        if (routeName && routes[routeName]) {
+            // Dibujar la ruta seleccionada
+            var routeCoords = routes[routeName];
+            var polyline = L.polyline(routeCoords, { color: 'blue' }).addTo(map);
+
+            // Guardar la capa de la ruta para quitarla luego si se selecciona otra
+            routes[routeName].layer = polyline;
+        }
+    });
+</script>
+
+</body>
+
+</html>
