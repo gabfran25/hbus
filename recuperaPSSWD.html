@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperación de Contraseña</title>
+  <style>
+    /* Colores */
+    :root {
+      --azulito: #06d6b1;
+      --azul-fuerte: #0858dd;
+      --amarillo: #e2d800;
+      --rosa: #dd50c5;
+    }
+
+    /* General */
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url(lgn2.jpg);
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #06d6b1;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--azul-fuerte);
+    }
+
+    p {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .input-field {
+      width: 90%;
+      padding: 10px;
+      margin: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--azul-fuerte);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: var(--azulito);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--rosa);
+    }
+
+    .footer a {
+      color: var(--amarillo);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Recuperación de Contraseña</h2>
+    <p>Introduce tu correo electrónico para recuperar tu contraseña.</p>
+    <form action="#" method="POST">
+      <input type="email" class="input-field" placeholder="Correo electrónico" required name="correo">
+      <button type="submit" class="btn">Recuperar Contraseña</button>
+    </form>
+    <div class="footer">
+      <p>¿Ya tienes cuenta? <a href="login.html">Iniciar sesión</a></p>
+    </div>
+  </div>
+
+</body>
+</html>
